@@ -12,21 +12,36 @@ use duct::*;
 
 fn main() -> Result<()> {
     let out_dir: PathBuf = env::var("OUT_DIR")?.into();
-    let build_dir = out_dir.join("build");
 
-    let sel4_config = SeL4Config::get();
+    let (sel4_dir, build_dir, is_custom_build): (PathBuf, PathBuf, bool) =
+        if let (Ok(sel4_dir), Ok(build_dir)) = (env::var("SEL4_DIR"), env::var("SEL4_BUILD_DIR")) {
+            println!("cargo:rerun-if-env-changed=SEL4_DIR");
+            println!("cargo:rerun-if-env-changed=SEL4_BUILD_DIR");
+            (sel4_dir.into(), build_dir.into(), true)
+        } else {
+            (
+                env::current_dir()?.join("sel4"),
+                out_dir.join("build"),
+                false,
+            )
+        };
 
-    if fs::try_exists(&build_dir)? {
-        fs::remove_dir_all(&build_dir)?;
+    if !sel4_dir.is_absolute() {
+        return Err(anyhow!("SEL4_DIR must be an absolute path!"));
     }
 
-    fs::create_dir(&build_dir)?;
+    if !build_dir.is_absolute() {
+        return Err(anyhow!("SEL4_BUILD_DIR must be an absolute path!"));
+    }
 
-    cmake_config(sel4_config, &build_dir)?;
-    ninja_build(&build_dir)?;
+    if !is_custom_build {
+        make_internal_build(&sel4_dir, &build_dir)?;
+    }
 
-    let inc_dirs: Vec<PathBuf> = get_include_dirs(&build_dir);
-    generate_bindings(&out_dir, inc_dirs.into_iter())?;
+    let inc_dirs: Vec<PathBuf> = get_include_dirs(&sel4_dir, &build_dir);
+    generate_bindings(&sel4_dir, &out_dir, inc_dirs.into_iter())?;
+
+    copy_artifacts(&build_dir, &out_dir)?;
 
     println!(
         "cargo:BUILD_DIR={}",
@@ -42,7 +57,26 @@ fn main() -> Result<()> {
     );
 
     println!("cargo:rustc-link-lib=static=sel4");
-    println!("cargo:rerun-if-changed=sel4");
+
+    if is_custom_build {
+        println!("cargo:rerun-if-changed={}", sel4_dir.to_str().unwrap());
+        println!("cargo:rerun-if-changed={}", build_dir.to_str().unwrap());
+    }
+
+    Ok(())
+}
+
+fn make_internal_build(_sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>) -> Result<()> {
+    let sel4_config = SeL4Config::get();
+
+    if fs::try_exists(&build_dir)? {
+        fs::remove_dir_all(&build_dir)?;
+    }
+
+    fs::create_dir(&build_dir)?;
+
+    cmake_config(sel4_config, &build_dir)?;
+    ninja_build(&build_dir)?;
 
     Ok(())
 }
@@ -168,9 +202,9 @@ fn ninja_build(build_dir: impl AsRef<Path>) -> Result<()> {
     Ok(())
 }
 
-fn get_include_dirs(build_dir: impl AsRef<Path>) -> Vec<PathBuf> {
+fn get_include_dirs(sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>) -> Vec<PathBuf> {
     let build_dir: PathBuf = build_dir.as_ref().into();
-    let sel4_dir: PathBuf = env::current_dir().unwrap().join("sel4");
+    let sel4_dir: PathBuf = sel4_dir.as_ref().into();
 
     let (arch, sel4_arch, sel4_plat, mode) = match () {
         #[cfg(feature = "stm32mp1")]
@@ -195,13 +229,17 @@ fn get_include_dirs(build_dir: impl AsRef<Path>) -> Vec<PathBuf> {
 }
 
 fn generate_bindings(
+    sel4_dir: impl AsRef<Path>,
     out_dir: impl AsRef<Path>,
     include_dirs: impl Iterator<Item = impl AsRef<Path>>,
 ) -> Result<()> {
+    let sel4_dir = sel4_dir.as_ref();
     let out_dir = out_dir.as_ref();
 
+    let sel4_header = "kernel/libsel4/include/sel4/sel4.h";
+
     let bindings = Builder::default()
-        .header("sel4/kernel/libsel4/include/sel4/sel4.h")
+        .header(sel4_dir.join(sel4_header).to_str().unwrap())
         .clang_arg("--target=arm-linux-gnueabi")
         .clang_args(
             include_dirs
@@ -214,6 +252,28 @@ fn generate_bindings(
         .generate()?;
 
     bindings.write_to_file(out_dir.join("bindings.rs"))?;
+
+    Ok(())
+}
+
+fn copy_artifacts(build_dir: impl AsRef<Path>, out_dir: impl AsRef<Path>) -> Result<()> {
+    let build_dir = build_dir.as_ref();
+    let out_dir = out_dir.as_ref();
+
+    // todo: CARGO_TARGET_DIR
+    let cargo_target_dir = out_dir
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap();
+
+    let kernel_elf = build_dir.join("kernel/kernel.elf");
+    let kernel_dtb = build_dir.join("kernel/kernel.dtb");
+
+    fs::copy(kernel_elf, cargo_target_dir.join("kernel.elf"))?;
+    fs::copy(kernel_dtb, cargo_target_dir.join("kernel.dtb"))?;
 
     Ok(())
 }
