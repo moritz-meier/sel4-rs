@@ -220,14 +220,15 @@ fn generate_sel4_linker_overlay(
 
             .reserved (NOLOAD) : {{
                 . = __devicetree_end;
-                . = ALIGN(1M);
-            }}
+                . = ALIGN(4K);
 
-            __rootserver_start = .;
+                __rootserver_start = .;
+            }}
         }}
         INSERT BEFORE .text;
 
         SECTIONS {{
+            . = ALIGN(4K);
             __rootserver_end = .;
         }}
         INSERT AFTER .stack;
