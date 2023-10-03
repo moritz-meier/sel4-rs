@@ -171,7 +171,7 @@ fn cmake_config(config: SeL4Config, build_dir: impl AsRef<Path>) -> Result<()> {
 
     let mut args = vec![
         format!("-G {}", "Ninja"),
-        format!("-DCROSS_COMPILER_PREFIX={}", "arm-linux-gnueabi-"),
+        format!("-DCROSS_COMPILER_PREFIX={}", "arm-unknown-linux-gnueabi-"),
         format!("-DCMAKE_TOOLCHAIN_FILE={}", "kernel/gcc.cmake"),
         format!("-S {}", "sel4"),
         format!("-B {}", build_dir.to_str().unwrap()),

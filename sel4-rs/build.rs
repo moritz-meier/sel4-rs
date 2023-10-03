@@ -212,31 +212,22 @@ fn generate_sel4_linker_overlay(
 
     let kernel_ld = formatdoc!(
         r#"SECTIONS {{
-            .kernel (NOLOAD) : {{
-                __kernel_start = {:#X};
-                . = __kernel_start;
-                FILL(0);
-                __kernel_end = __kernel_start + {:#X};
-                . = __kernel_end;
-            }} > RAM
+            __kernel_start = {:#X};
+            __kernel_end = __kernel_start + {:#X};
 
-            .devicetree (NOLOAD) : {{
-                __devicetree_start = {:#X};
-                . = __devicetree_start;
-                FILL(0);
-                __devicetree_end = __devicetree_start + {:#X};
+            __devicetree_start = {:#X};
+            __devicetree_end = __devicetree_start + {:#X};
+
+            .reserved (NOLOAD) : {{
                 . = __devicetree_end;
-            }} > RAM
-
-            .fill : {{
                 . = ALIGN(1M);
-                __rootserver_start = .;
             }}
+
+            __rootserver_start = .;
         }}
         INSERT BEFORE .text;
 
         SECTIONS {{
-            . = ALIGN(0x1000);
             __rootserver_end = .;
         }}
         INSERT AFTER .stack;
