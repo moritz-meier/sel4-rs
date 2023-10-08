@@ -219,9 +219,15 @@ fn generate_sel4_linker_overlay(
             __devicetree_end = __devicetree_start + {:#X};
 
             .reserved (NOLOAD) : {{
-                . = __devicetree_end;
-                . = ALIGN(4K);
+                . = __kernel_start;
+                FILL(0x0);
+                . = __kernel_end;
 
+                . = __devicetree_start;
+                FILL(0x0);
+                . = __devicetree_end;
+
+                . = ALIGN(4K);
                 __rootserver_start = .;
             }}
         }}
