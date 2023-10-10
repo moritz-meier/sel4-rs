@@ -4,14 +4,18 @@
 
 use core::panic::PanicInfo;
 
-use sel4_rs::{rootserver, Rootserver};
+use sel4_rs::{rootserver, sel4_sys, Rootserver};
 
 rootserver!(System);
 struct System;
 
 impl Rootserver for System {
     fn rootserver() -> ! {
-        todo!()
+        unsafe { sel4_sys::seL4_DebugDumpScheduler() };
+
+        unsafe { sel4_sys::seL4_DebugHalt() };
+
+        loop {}
     }
 }
 
