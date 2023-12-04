@@ -1,12 +1,14 @@
 #![no_std]
 #![feature(naked_functions)]
 
-use core::{arch::asm, marker::PhantomData, mem::transmute};
+use core::{arch::asm, fmt::Write, marker::PhantomData, mem::transmute, slice};
 
 #[cfg(feature = "zynq7000")]
 pub use zynq7000 as platform;
 
-use platform::arch::{self, NORMAL};
+use platform::arch::{self, DEVICE, NORMAL};
+
+pub use sel4_sys;
 
 mod kernel;
 
@@ -27,11 +29,14 @@ pub trait Rootserver {
 pub struct System<R: Rootserver>(PhantomData<R>);
 
 impl<R: Rootserver> arch::MemoryMap for System<R> {
-    const MAP: &'static [arch::MemoryRegion] = &[arch::MemoryRegion::sections(
-        0..=*kernel::KERNEL_VIRT_RANGE.start() - 1,
-        0,
-        NORMAL.read_writeable().executeable(),
-    )];
+    const MAP: &'static [arch::MemoryRegion] = &[
+        arch::MemoryRegion::sections(
+            0..=*kernel::KERNEL_VIRT_RANGE.start() - 1,
+            0,
+            NORMAL.read_writeable().executeable(),
+        ),
+        arch::MemoryRegion::page(0xE000_1000, 0xE000_1000, DEVICE.read_writeable()),
+    ];
 }
 
 impl<R: Rootserver> arch::EntryPoint for System<R> {
@@ -56,6 +61,23 @@ impl<R: Rootserver> arch::EntryPoint for System<R> {
         let rootserver_start = unsafe { &__rootserver_start as *const u8 as usize };
         let rootserver_end = unsafe { &__rootserver_end as *const u8 as usize };
 
+        let buf = unsafe {
+            slice::from_raw_parts(
+                devicetree_start as *const u8,
+                devicetree_end - devicetree_start,
+            )
+        };
+
+        let dt = fdt::Fdt::new(buf).unwrap();
+
+        platform::platform_init(&dt);
+
+        critical_section::with(|cs| {
+            let mut serial = platform::SERIAL.borrow_ref_mut(cs);
+
+            serial.as_mut().unwrap().write_str("Hello World!").ok();
+        });
+
         // arch::MemoryRegion::sections(
         //     0..=*kernel::KERNEL_VIRT_RANGE.start() - 1,
         //     kernel::KERNEL_PHYS_ADDR,
@@ -64,7 +86,7 @@ impl<R: Rootserver> arch::EntryPoint for System<R> {
         // .map();
 
         arch::MemoryRegion::sections(
-            (*kernel::KERNEL_VIRT_RANGE.start())..=(0xFFFF_FFFF),
+            (*kernel::KERNEL_VIRT_RANGE.start())..=0xFFFF_FFFF,
             kernel::KERNEL_PHYS_ADDR,
             NORMAL.read_writeable().executeable(),
         )

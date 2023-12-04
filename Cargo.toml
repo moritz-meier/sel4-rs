@@ -1,3 +1,9 @@
 [workspace]
 resolver = "2"
 members = ["sel4-sys", "sel4-rs", "platforms/zynq7000", "examples/hello-world"]
+
+default-members = ["examples/hello-world"]
+
+[workspace.dependencies]
+fdt = { git = "https://github.com/repnop/fdt.git" }
+tock-registers = { git = "https://github.com/moritz-meier/tock.git", branch = "feature/fieldvalue-from-value" }
