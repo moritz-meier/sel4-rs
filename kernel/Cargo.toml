@@ -1,0 +1,22 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = ["zynq7000", "mcs"]
+zynq7000 = ["sel4-kernel-sys/zynq7000"]
+stm32mp1 = ["sel4-kernel-sys/stm32mp1"]
+mcs = ["sel4-kernel-sys/mcs"]
+dangerous-code-injection = ["sel4-kernel-sys/dangerous-code-injection"]
+
+[dependencies]
+armv7a = { path = "../arch/armv7a", features = ["cortex-a9", "multicore"] }
+sel4-kernel-sys = { path = "../sys/sel4-kernel-sys", default-features = false }
+critical-section = "1.1.2"
+
+[build-dependencies]
+anyhow = "1.0.79"
+indoc = "2.0.4"

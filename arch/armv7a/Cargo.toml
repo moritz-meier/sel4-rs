@@ -1,0 +1,24 @@
+[package]
+name = "armv7a"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+multicore = ["mpcore"]
+
+mpcore = []
+sec_ext = []
+lpa_ext = []
+virt_ext = ["sec_ext", "lpa_ext"]
+
+cortex-a7 = ["mpcore", "sec_ext", "lpa_ext", "virt_ext"]
+cortex-a9 = ["sec_ext"]
+
+[dependencies]
+arch-macros = { path = "../macros", features = ["armv7a"] }
+critical-section = { version = "1.1.2", features = ["restore-state-u32"] }
+tock-registers = "0.9.0"
+macropol = "0.1.3"
+paste = "1.0.14"

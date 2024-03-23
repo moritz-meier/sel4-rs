@@ -1,0 +1,9 @@
+[build]
+target = "armv7a-none-eabi"
+
+[env]
+DEVICETREE_OVERLAY = "/run/media/data/moritz/Repositories/sel4-rs/kernel/arduzynq.dts"
+
+[target.armv7a-none-eabi]
+
+runner = "qemu-system-arm -machine xilinx-zynq-a9 -m size=1024M -serial mon:stdio -nographic -S -s -kernel"

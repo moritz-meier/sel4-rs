@@ -1,9 +1,0 @@
-[package]
-name = "zynq7000"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-armv7a = { git = "https://github.com/moritz-meier/armv7a.git" }

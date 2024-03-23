@@ -1,4 +1,12 @@
 {
     "rust-analyzer.cargo.target": "armv7a-none-eabi",
-    "rust-analyzer.check.allTargets": false
+    "rust-analyzer.check.allTargets": false,
+    "rust-analyzer.diagnostics.disabled": [
+        "unresolved-proc-macro"
+    ],
+    "rust-analyzer.cargo.features": [
+        // "cortex-a9",
+        // "mpcore"
+    ],
+    "cortex-debug.variableUseNaturalFormat": false
 }

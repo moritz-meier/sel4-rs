@@ -5,7 +5,7 @@
             "type": "lldb",
             "request": "custom",
             "targetCreateCommands": [
-                "target create ${workspaceFolder}/target/armv7a-none-eabi/debug/hello-world",
+                "target create ${workspaceFolder}/target/armv7a-none-eabi/debug/kernel"
             ],
             "processCreateCommands": [
                 "gdb-remote localhost:1234"
@@ -15,54 +15,39 @@
             "name": "QEMU - Attach GDB",
             "type": "cortex-debug",
             "request": "attach",
-            "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/hello-world",
+            "gdbPath": "arm-none-eabi-gdb",
             "servertype": "external",
             "gdbTarget": "localhost:1234",
-            "gdbPath": "arm-unknown-linux-gnueabi-gdb"
+            "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/kernel",
         },
         {
-            "name": "QEMU - Launch",
+            "name": "ZYNQ - Launch GDB",
             "type": "cortex-debug",
-            "servertype": "qemu",
-            "device": "xilinx-zynq-a9",
-            "cpu": "cortex-a9",
-            "machine": "xilinx-zynq-a9",
-            "serverArgs": [
-                "-serial",
-                "null",
-                "-serial",
-                "mon:stdio",
-                "-m",
-                "size=1024M"
-            ],
-            "request": "attach",
-            "preLaunchTask": "${defaultBuildTask}",
-            "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/hello-world",
-            "runToEntryPoint": "start",
-            "preAttachCommands": [
-                "add-symbol-file ${workspaceFolder}/target/armv7a-none-eabi/debug/build/sel4-sys-7b32118ad30db6dc/out/build/kernel/kernel.elf",
-            ],
-            "postAttachCommands": [
-                "load ${workspaceFolder}/target/armv7a-none-eabi/debug/build/sel4-sys-7b32118ad30db6dc/out/build/kernel/kernel.elf",
-                //"load ${workspaceFolder}/target/armv7a-none-eabi/debug/build/sel4-sys-7b32118ad30db6dc/out/build/kernel/kernel.dtb",
-                "load"
-            ]
+            "request": "launch",
+            "gdbPath": "arm-none-eabi-gdb",
+            "servertype": "external",
+            "gdbTarget": "localhost:3000",
+            "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/kernel",
+            "breakAfterReset": true,
+            // "preLaunchCommands": [
+            //     "set scheduler-locking step",
+            //     "set schedule-multiple on",
+            //     "add-inferior -exec ${workspaceFolder}/target/armv7a-none-eabi/debug/kernel",
+            //     "inferior 2",
+            //     "attach 2",
+            //     "set $pc = *hello_world::_start",
+            //     "inferior 1",
+            // ],
         },
-        // {
-        //     "name": "STM32MP1 - Launch",
-        //     "type": "cortex-debug",
-        //     "servertype": "jlink",
-        //     "device": "STM32MP15xx_A7",
-        //     "interface": "swd",
-        //     "request": "attach",
-        //     "preLaunchTask": "${defaultBuildTask}",
-        //     "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/hello-world",
-        //     "runToEntryPoint": "start",
-        //     "preAttachCommands": [],
-        //     "postAttachCommands": [
-        //         "interrupt",
-        //         "load"
-        //     ]
-        // },
+        {
+            "name": "ZYNQ - Attach GDB",
+            "type": "cortex-debug",
+            "request": "attach",
+            "gdbPath": "arm-none-eabi-gdb",
+            "servertype": "external",
+            "gdbTarget": "localhost:3000",
+            "executable": "${workspaceFolder}/target/armv7a-none-eabi/debug/kernel",
+            "breakAfterReset": true,
+        }
     ]
 }

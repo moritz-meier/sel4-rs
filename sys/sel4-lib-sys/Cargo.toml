@@ -1,0 +1,22 @@
+[package]
+name = "sel4-lib-sys"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+links = "sel4-lib"
+
+[features]
+default = ["zynq7000", "mcs"]
+zynq7000 = ["sel4-sys/zynq7000"]
+stm32mp1 = ["sel4-sys/stm32mp1"]
+mcs = ["sel4-sys/mcs"]
+dangerous-code-injection = ["sel4-sys/dangerous-code-injection"]
+
+[dependencies]
+sel4-sys = { path = "../sel4-sys", default-features = false }
+
+[build-dependencies]
+anyhow = "1.0.79"
+bindgen = "0.69.2"
