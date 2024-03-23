@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(naked_functions)]
+#![feature(trait_alias)]
 #![feature(stmt_expr_attributes)]
 #![feature(pointer_is_aligned)]
 #![feature(strict_provenance)]

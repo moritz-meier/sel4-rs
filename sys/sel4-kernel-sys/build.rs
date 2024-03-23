@@ -40,8 +40,6 @@ fn objcopy_devtree(build_dir: impl AsRef<Path>, out_dir: impl AsRef<Path>) -> Re
     let kernel_dtb_obj = out_dir.join("kernel.dtb.obj");
 
     let out_type = match () {
-        #[cfg(feature = "stm32mp1")]
-        () => "elf32-littlearm",
         #[cfg(feature = "zynq7000")]
         () => "elf32-littlearm",
     };
@@ -52,16 +50,13 @@ fn objcopy_devtree(build_dir: impl AsRef<Path>, out_dir: impl AsRef<Path>) -> Re
         format!("-O"),
         format!("{}", out_type),
         format!("--rename-section"),
-        format!(".data=.devicetree,alloc,load"),
+        format!(".data=.devicetree"),
         format!("{}", kernel_dtb.to_str().unwrap()),
         format!("{}", kernel_dtb_obj.to_str().unwrap()),
     ];
 
-    let output = cmd("arm-unknown-linux-gnueabi-objcopy", args).read()?;
-
-    for line in output.lines() {
-        println!("cargo:warning={}", line);
-    }
+    // todo: use cross_compiler_prefix instead of hard coded prefix
+    cmd("arm-unknown-linux-gnueabi-objcopy", args).run()?;
 
     Ok(())
 }
@@ -70,9 +65,8 @@ fn link_kernel(build_dir: impl AsRef<Path>, out_dir: impl AsRef<Path>) -> Result
     let build_dir = build_dir.as_ref();
     let out_dir = out_dir.as_ref();
 
+    // todo: use <sel4 build dir>/kernel/gen_config/gen_config.json or ToolchainConfig
     let (arch, archv, armv, mode) = match () {
-        #[cfg(feature = "stm32mp1")]
-        () => ("arm", "armv", "armv7-a", "32"),
         #[cfg(feature = "zynq7000")]
         () => ("arm", "armv", "armv7-a", "32"),
     };
@@ -106,11 +100,7 @@ fn link_kernel(build_dir: impl AsRef<Path>, out_dir: impl AsRef<Path>) -> Result
 
     args.append(&mut obj_files);
 
-    let output = cmd("arm-unknown-linux-gnueabi-ar", args).read()?;
-
-    for line in output.lines() {
-        println!("cargo:warning={}", line);
-    }
+    cmd("arm-unknown-linux-gnueabi-ar", args).run()?;
 
     Ok(())
 }
@@ -124,11 +114,7 @@ fn redefine_start_sym(out_dir: impl AsRef<Path>) -> Result<()> {
         format!("{}", out_dir.join("libkernel.a").to_str().unwrap()),
     ];
 
-    let output = cmd("arm-unknown-linux-gnueabi-objcopy", args).read()?;
-
-    for line in output.lines() {
-        println!("cargo:warning={}", line);
-    }
+    cmd("arm-unknown-linux-gnueabi-objcopy", args).run()?;
 
     Ok(())
 }
@@ -142,11 +128,7 @@ fn prefix_sections(out_dir: impl AsRef<Path>) -> Result<()> {
         format!("{}", out_dir.join("libkernel.a").to_str().unwrap()),
     ];
 
-    let output = cmd("arm-unknown-linux-gnueabi-objcopy", args).read()?;
-
-    for line in output.lines() {
-        println!("cargo:warning={}", line);
-    }
+    cmd("arm-unknown-linux-gnueabi-objcopy", args).run()?;
 
     Ok(())
 }

@@ -1,6 +1,7 @@
-use core::arch::asm;
-
+#[cfg(feature = "multicore")]
 pub(super) unsafe fn lock(lock: *mut u32) {
+    use core::arch::asm;
+
     asm!(
         "mov r2, #1",
         "1: ldrex r1, [{lock}]",
@@ -14,7 +15,10 @@ pub(super) unsafe fn lock(lock: *mut u32) {
     )
 }
 
+#[cfg(feature = "multicore")]
 pub(super) unsafe fn unlock(lock: *mut u32) {
+    use core::arch::asm;
+
     asm!(
         "mov r1, #0",
         "dmb",

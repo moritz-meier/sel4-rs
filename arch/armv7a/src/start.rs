@@ -1,9 +1,6 @@
-use core::{
-    arch::asm,
-    ptr::{self, addr_of_mut},
-};
+use core::arch::asm;
 
-use crate::{asm::*, vectors};
+use crate::vectors;
 
 pub use arch_macros::entry;
 
@@ -19,9 +16,14 @@ pub trait SecondaryEntry {
     unsafe extern "C" fn secondary_entry(cpu_id: usize) -> !;
 }
 
+#[cfg(feature = "multicore")]
 static mut NON_BOOT_LOCK: u32 = 1;
 
+#[cfg(feature = "multicore")]
 pub fn release_secondary_cores() {
+    use crate::asm::*;
+    use core::ptr::{self, addr_of_mut};
+
     unsafe {
         ptr::write_volatile(addr_of_mut!(NON_BOOT_LOCK), 0);
         dsb();
@@ -29,9 +31,15 @@ pub fn release_secondary_cores() {
     }
 }
 
+#[cfg(not(feature = "multicore"))]
+pub trait Entry = PrimaryEntry;
+
+#[cfg(feature = "multicore")]
+pub trait Entry = PrimaryEntry + SecondaryEntry;
+
 #[naked]
 #[rustfmt::skip]
-pub unsafe extern "C" fn start<EntryImpl: PrimaryEntry + SecondaryEntry>() -> ! {
+pub unsafe extern "C" fn start<EntryImpl: Entry>() -> ! {
 
     #[cfg(not(feature = "multicore"))]
     asm!(

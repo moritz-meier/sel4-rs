@@ -32,7 +32,7 @@ impl SnoopControlUnit {
         scu.control.modify(Control::Enable::SET);
     }
 
-    #[cfg(all(feature = "cortex-a9", feature = "mpcore"))]
+    #[cfg(feature = "cortex-a9")]
     pub unsafe fn disable() {
         let scu = get_scu_regs();
         scu.control.modify(Control::Enable::CLEAR);
@@ -53,7 +53,7 @@ impl SnoopControlUnit {
     }
 }
 
-#[cfg(feature = "cortex-a9")]
+#[cfg(all(feature = "cortex-a9", feature = "mpcore"))]
 unsafe fn get_scu_regs() -> &'static mut SCU_RegisterBlock {
     let base_addr = CBAR.get();
     let scu = base_addr as *mut SCU_RegisterBlock;

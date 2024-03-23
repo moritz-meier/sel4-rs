@@ -1,7 +1,6 @@
-use core::{arch::asm, ptr::addr_of_mut};
+use core::arch::asm;
 
 use critical_section::{set_impl, RawRestoreState};
-use tock_registers::interfaces::Readable;
 
 mod spinlock;
 
@@ -35,6 +34,8 @@ static mut GLOBAL_LOCK: u32 = 0;
 #[cfg(feature = "multicore")]
 unsafe impl critical_section::Impl for CriticalSection {
     unsafe fn acquire() -> RawRestoreState {
+        use core::ptr::addr_of_mut;
+
         let restore_cpsr = CPSR.get();
         spinlock::lock(addr_of_mut!(GLOBAL_LOCK));
         unsafe { asm!("cpsid if") };
@@ -42,6 +43,8 @@ unsafe impl critical_section::Impl for CriticalSection {
     }
 
     unsafe fn release(restore_cpsr: RawRestoreState) {
+        use core::ptr::addr_of_mut;
+
         if !CPSR::I.is_set(restore_cpsr) {
             unsafe { asm!("cpsie i") }
         }

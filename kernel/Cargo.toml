@@ -6,15 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["zynq7000", "mcs"]
-zynq7000 = ["sel4-kernel-sys/zynq7000"]
-stm32mp1 = ["sel4-kernel-sys/stm32mp1"]
+default = []
+zynq7000 = ["sel4-kernel-sys/zynq7000", "armv7a/cortex-a9", "armv7a/mpcore"]
 mcs = ["sel4-kernel-sys/mcs"]
+smp = ["sel4-kernel-sys/smp", "armv7a/multicore"]
 dangerous-code-injection = ["sel4-kernel-sys/dangerous-code-injection"]
 
 [dependencies]
-armv7a = { path = "../arch/armv7a", features = ["cortex-a9", "multicore"] }
+armv7a = { path = "../arch/armv7a", default-features = false }
 sel4-kernel-sys = { path = "../sys/sel4-kernel-sys", default-features = false }
+
 critical-section = "1.1.2"
 
 [build-dependencies]

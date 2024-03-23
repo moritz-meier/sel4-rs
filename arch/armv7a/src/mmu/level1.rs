@@ -45,6 +45,14 @@ impl PageDirectory {
     }
 }
 
+impl Default for PageDirectory {
+    fn default() -> Self {
+        Self {
+            entries: PageDirectoryEntries::EMPTY,
+        }
+    }
+}
+
 #[repr(align(0x4000))]
 struct PageDirectoryEntries {
     pub(super) entries: [PageDirectoryEntry; 4096],

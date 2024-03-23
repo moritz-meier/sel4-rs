@@ -8,10 +8,11 @@ edition = "2021"
 links = "sel4"
 
 [features]
-default = ["zynq7000", "mcs"]
+default = []
 zynq7000 = []
-stm32mp1 = []
+zcu102 = []
 mcs = []
+smp = []
 dangerous-code-injection = []
 
 

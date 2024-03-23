@@ -11,9 +11,6 @@ fn main() -> Result<()> {
     let sel4_dir: PathBuf = env::var("DEP_SEL4_DIR")?.into();
     let build_dir: PathBuf = env::var("DEP_SEL4_BUILD_DIR")?.into();
 
-    // println!("cargo:warning=SEL4_DIR={:?}", sel4_dir);
-    // println!("cargo:warning=BUILD_DIR={:?}", build_dir);
-
     copy_artifact(&build_dir, &out_dir)?;
 
     let inc_dirs: Vec<PathBuf> = get_include_dirs(&sel4_dir, &build_dir);
@@ -39,9 +36,8 @@ fn get_include_dirs(sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>) -> 
     let build_dir: PathBuf = build_dir.as_ref().into();
     let sel4_dir: PathBuf = sel4_dir.as_ref().into();
 
-    let (arch, sel4_arch, sel4_plat, mode) = match () {
-        #[cfg(feature = "stm32mp1")]
-        () => ("arm", "aarch32", "stm32mp1", "32"),
+    // todo: for further targets use build config from <sel4 build dir>/kernel/gen_config/gen_config.json
+    let (arch, arch_mode, sel4_plat, mode) = match () {
         #[cfg(feature = "zynq7000")]
         () => ("arm", "aarch32", "zynq7000", "32"),
     };
@@ -49,7 +45,7 @@ fn get_include_dirs(sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>) -> 
     vec![
         sel4_dir.join("kernel/libsel4/include"),
         sel4_dir.join(format!("kernel/libsel4/arch_include/{arch}")),
-        sel4_dir.join(format!("kernel/libsel4/sel4_arch_include/{sel4_arch}")),
+        sel4_dir.join(format!("kernel/libsel4/sel4_arch_include/{arch_mode}")),
         sel4_dir.join(format!("kernel/libsel4/sel4_plat_include/{sel4_plat}")),
         sel4_dir.join(format!("kernel/libsel4/mode_include/{mode}")),
         build_dir.join("kernel/gen_config"),
@@ -57,7 +53,7 @@ fn get_include_dirs(sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>) -> 
         build_dir.join("libsel4/gen_config"),
         build_dir.join("libsel4/include"),
         build_dir.join(format!("libsel4/arch_include/{arch}")),
-        build_dir.join(format!("libsel4/sel4_arch_include/{sel4_arch}")),
+        build_dir.join(format!("libsel4/sel4_arch_include/{arch_mode}")),
     ]
 }
 

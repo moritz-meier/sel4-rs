@@ -5,8 +5,9 @@
         "unresolved-proc-macro"
     ],
     "rust-analyzer.cargo.features": [
-        // "cortex-a9",
-        // "mpcore"
+        "zynq7000",
+        "mcs",
+        // "smp"
     ],
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": false,
 }

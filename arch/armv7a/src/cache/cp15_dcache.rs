@@ -1,10 +1,5 @@
 use core::{mem::size_of, ops::RangeInclusive};
 
-use tock_registers::{
-    fields::{FieldValue, TryFromValue},
-    interfaces::{ReadWriteable, Readable, Writeable},
-};
-
 use crate::{asm::*, registers::*};
 
 pub(super) unsafe fn enable() {

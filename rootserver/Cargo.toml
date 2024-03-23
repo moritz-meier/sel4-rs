@@ -1,0 +1,18 @@
+[package]
+name = "rootserver"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+zynq7000 = ["sel4-lib-sys/zynq7000"]
+mcs = ["sel4-lib-sys/mcs"]
+smp = ["sel4-lib-sys/smp"]
+dangerous-code-injection = ["sel4-lib-sys/dangerous-code-injection"]
+
+
+[dependencies]
+sel4-lib-sys = { path = "../sys/sel4-lib-sys" }
+macros = { path = "macros" }

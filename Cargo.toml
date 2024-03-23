@@ -1,3 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["kernel", "sys/sel4-kernel-sys", "sys/sel4-lib-sys", "sys/sel4-sys"]
+members = [
+    "examples/hello-world-rootserver",
+    "kernel",
+    "rootserver",
+    "rootserver/macros",
+    "sys/sel4-kernel-sys",
+    "sys/sel4-lib-sys",
+    "sys/sel4-sys",
+]

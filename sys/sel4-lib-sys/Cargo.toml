@@ -8,10 +8,10 @@ edition = "2021"
 links = "sel4-lib"
 
 [features]
-default = ["zynq7000", "mcs"]
+default = []
 zynq7000 = ["sel4-sys/zynq7000"]
-stm32mp1 = ["sel4-sys/stm32mp1"]
 mcs = ["sel4-sys/mcs"]
+smp = ["sel4-sys/smp"]
 dangerous-code-injection = ["sel4-sys/dangerous-code-injection"]
 
 [dependencies]
