@@ -1,10 +1,7 @@
 [build]
 target = "armv7a-none-eabi"
 
-[env]
-# DEVICETREE_OVERLAY = "../../examples/arduzynq.dts"
-
 [target.armv7a-none-eabi]
 
 
-runner = "qemu-system-arm -machine xilinx-zynq-a9 -m size=512M -serial mon:stdio -nographic -S -s -kernel"
+runner = "qemu-system-arm -machine xilinx-zynq-a9 -m size=512M -serial null -serial mon:stdio -nographic -S -s -kernel"

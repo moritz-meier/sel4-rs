@@ -61,20 +61,13 @@ fn make_internal_build(_sel4_dir: impl AsRef<Path>, build_dir: impl AsRef<Path>)
     let toolchain_config = ToolchainConfig::get();
     let sel4_config = SeL4Config::get();
 
-    // if fs::try_exists(&build_dir)? {
-    //     fs::remove_dir_all(&build_dir)?;
-    // }
-
-    // fs::create_dir(&build_dir)?;
-
-    // cmake_config(toolchain_config, sel4_config, &build_dir)?;
-    // ninja_build(&build_dir)?;
-
-    if !fs::try_exists(&build_dir)? {
-        fs::create_dir(&build_dir)?;
-        cmake_config(toolchain_config, sel4_config, &build_dir)?;
+    if fs::try_exists(&build_dir)? {
+        fs::remove_dir_all(&build_dir)?;
     }
 
+    fs::create_dir(&build_dir)?;
+
+    cmake_config(toolchain_config, sel4_config, &build_dir)?;
     ninja_build(&build_dir)?;
 
     Ok(())
