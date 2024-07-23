@@ -1,0 +1,3 @@
+[submodule "sys/sel4"]
+	path = sys/sel4
+	url = git@github.com:moritz-meier/seL4.git
